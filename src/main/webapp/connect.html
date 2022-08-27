@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"> 
+<html>
+
+<head>
+  <title id="Titolo">Prova di connessione</title> 
+</head>
+
+<body>
+<form id=”prova”>
+   <label for=”utente”>Userid</label><input type=”text” id=”utente” name=”username” value="edoardo"></input><br>
+   <label for=”pwd”>Password</label><input type=”text” id=”pwd” name=”password” value="ciao"></input><br>
+   <input type="button" value="Connect" onclick="connessione();">
+</form>
+<br>
+<label for"Error">Status:</label><err id="Error"></err><br>
+<label for"Debug">Dati:</label><dbg id="Debug"></dbg>
+
+</body>
+<script>
+
+let token="";
+
+function connessione() {
+  
+
+   var xhr = new XMLHttpRequest();
+
+   xhr.open("POST", "authenticate");
+   xhr.setRequestHeader("Content-Type", "application/json");
+   var js=JSON.stringify({"username":"edoardo","password":"ciao"}); 
+   xhr.send(js);
+   xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+         document.getElementById("Error").innerHTML = "Tutto ok";
+         document.getElementById("Debug").innerHTML = xhr.responseText;
+		 token = "Bearer " +xhr.responseText;
+		 c2();
+	  } else {
+         document.getElementById("Error").innerHTML = "Errore";
+         document.getElementById("Debug").innerHTML = xhr.status +" "+xhr.readyState;
+      }
+   };
+}
+
+function c2() {   
+
+   xhr2 = new XMLHttpRequest();
+   xhr2.open("POST","api/contatti");
+   xhr2.setRequestHeader("Content-Type", "application/json");
+   xhr2.setRequestHeader("Authorization", token);
+   js=JSON.stringify({"telefono":"1234"}); 
+
+   xhr2.send(js);
+   xhr2.onreadystatechange = function() {
+      if (xhr2.readyState == 4 && xhr2.status == 200) {
+         document.getElementById("Error").innerHTML = "Tutto ok";
+         document.getElementById("Debug").innerHTML = JSON.parse(xhr2.responseText)[6].nomeCognome;
+		 
+	  } else {
+         document.getElementById("Error").innerHTML = "Errore";
+         document.getElementById("Debug").innerHTML = xhr2.status +" "+xhr2.readyState;
+      }
+   };
+   
+}
+
+</script>
+</html>
