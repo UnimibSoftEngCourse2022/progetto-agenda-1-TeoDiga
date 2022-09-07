@@ -1,7 +1,9 @@
 README
 Di Gallo Matteo 830703 m.digallo@campus.unimib.it
 
-Per compilare è richiesto
+Per compilare è richiesto:
+    inserire il comando "mvn verify" nella console
+Per eseguire è richiesto
 
 Una volta compilato ed eseguito il progetto usare un browser su "localhost:8080/agenda.html"
 Inizialmente si verrà accolti da una schermata che propone la scelta fra "login" e "registrazione".

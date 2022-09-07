@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title id="Titolo">Agenda - Titolo</title>
+  <meta charset="utf-8">
+</head>
+
+<body onload="formLogin();">
+<m id="menu" style="position:fixed;"></m><br>
+<r1 id="Riga1">Riga1</r1><br>
+<f1 id="Form1">Form1</f1><br>
+<t1 id="Tab1">Tab1</t1><br>
+
+<f2 id="Form2">Form2</f2>
+<t2 id="Tab2">Tab2</t2>
+
+<br>
+<err id="Error"></err><br>
+<dbg id="Debug"></dbg>
+
+</body>
+<script> 
+let token=""; 
+let listaUMT=[{t:"",v:""},{t:"anno",v:"A"},{t:"mese",v:"M"},{t:"giorno",v:"G"},{t:"ora",v:"O"},{t:"minuto",v:"N"},{t:"secondo",v:"S"}];
+ 
+function accessBackEnd(operazione, frm, api, todo) {
+  var js;
+  if (frm=="") {
+     js = JSON.stringify({"CRUD":"R"});
+  } else {
+     document.getElementById("crud").value=operazione;
+     var map = document.getElementById(frm);
+
+     var fd =new FormData(map); 
+     js = JSON.stringify(Object.fromEntries(fd));
+ 	 if (operazione=="C") {document.getElementById(frm).reset();}
+ 	 if (operazione=="D") {document.getElementById(frm).reset();}
+     document.getElementById(frm).hidden=true;
+  }
+ 
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", api);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.setRequestHeader("Authorization", token);
+
+  xhr.send(js);                                                            
+  xhr.onreadystatechange = function() {      
+    if (xhr.readyState == 4 && xhr.status == 200) {         
+	   document.getElementById("Error").innerHTML = "Tutto ok";
+ 	   document.getElementById("Debug").innerHTML = "";      
+       todo(xhr.responseText);
+    } else {         
+	   document.getElementById("Error").innerHTML = "Errore ";      
+	   document.getElementById("Debug").innerHTML = xhr.responseText;      
+	}   
+  } 
+
+}
+
+function help(testo) { document.getElementById("Help").innerHTML=testo;}
+function nascondi(f) { document.getElementById(f).hidden=true;}
+function mostra(f) { 
+   document.getElementById(f).hidden=false;
+   document.getElementById(f).reset();
+   document.getElementById("id").value="";
+   document.getElementById("crud").value="";
+}
+function hideForms() {
+if (document.getElementById('formAgenda')!=null) {nascondi('formAgenda');};
+if (document.getElementById('formAttivita')!=null) {nascondi('formAttivita');};
+if (document.getElementById('formImpegni')!=null) {nascondi('formImpegni');};
+if (document.getElementById('formContatti')!=null) {nascondi('formContatti');};
+if (document.getElementById('formFiltraAgenda')!=null) {nascondi('formFiltraAgenda');};
+}
+
+function umt(testo) {
+   for (i=0; i<listaUMT.length;i++) {
+      if (listaUMT[i].t == testo) {return listaUMT[i].v;}
+   }
+   return "";
+}
+
+function opzioniUMT(campo) {
+   var target=document.getElementById(campo);
+   for (i=0; i<listaUMT.length;i++) {
+      var o = document.createElement("option");
+      o.text=listaUMT[i].t;
+      o.value=listaUMT[i].v;
+      target.add(o);
+   }
+}
+
+</script>
+
+<script src="user.js"></script>
+<script src="login.js"></script>
+<script src="menu.js"></script>
+<script src="contatti.js"></script>
+<script src="tipicontatto.js"></script>
+<script src="tipiattivita.js"></script>
+<script src="impegni.js"></script>
+<script src="attivita.js"></script>
+<script src="agenda.js"></script>
+
+</html>
