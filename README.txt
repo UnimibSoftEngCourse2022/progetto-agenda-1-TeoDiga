@@ -46,5 +46,4 @@ Lo soluzione é basata su
 - Front end in HTML e Javascript codificati manualmente com chamate XMLHTTPRequest
 
 
-
 Compilato, eseguito e testato su un pc con Windows 10 e Mac.
