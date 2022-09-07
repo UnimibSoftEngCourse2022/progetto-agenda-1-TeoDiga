@@ -2,8 +2,12 @@ README
 Di Gallo Matteo 830703 m.digallo@campus.unimib.it
 
 Per compilare è richiesto:
-    inserire il comando "mvn verify" nella console
-Per eseguire è richiesto
+    inserire il comando "mvn package" nella console
+Per eseguire è richiesto:
+    java -jar target/demo-0.0.1-SNAPSHOT.jar
+
+In alternativa caricarlo ed eseguirlo su IntelliJIdea.
+Versione di Java usata 17.
 
 Una volta compilato ed eseguito il progetto usare un browser su "localhost:8080/agenda.html"
 Inizialmente si verrà accolti da una schermata che propone la scelta fra "login" e "registrazione".
@@ -21,3 +25,5 @@ Attività presenta diverse funzioni uniche quali:
 	Pianifica: permette di fissare sull'agenda un'attività scegliendo manualmente una data di inizio
 	Ottimizza: data una data di inizio e una di fine, restituisce una lista di tutte le possibili attività non pianificate da eseguirsi una in fila all'altra fra un evento e l'altro(consiglio di inserire una impegno "riposo" la notte altrimenti il database supporrà che siate in grado di rimanere svegli 24/7)
 Inoltre è presente una rubrica con la possibilità di creare, cercare, modificare ed eliminare i propri contatti con mail e numero di telefono e di catalogarli in tipologie come per gli eventi e le attività.
+
+Compilato, eseguito e testato su un pc con Windows 10 e Mac.
