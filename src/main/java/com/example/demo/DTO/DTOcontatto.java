@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DTOcontatto {
+    public Character CRUD;
     public Integer id;
     public String tipo;
     public String nomeCognome;

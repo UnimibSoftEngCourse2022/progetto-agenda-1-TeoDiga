@@ -18,8 +18,14 @@ import java.sql.Timestamp;
 public class T_Evento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Integer id_evento;
-    public Timestamp orario_inizio, orario_fine, orario_allarme;
+    @Column(name = "id_evento")
+    public Integer idEvento;
+    @Column(name = "orario_inizio")
+    public Timestamp orarioInizio;
+    @Column(name = "orario_fine")
+    public Timestamp orarioFine;
+    @Column(name = "orario_allarme")
+    public Timestamp orarioAllarme;
     @ManyToOne
     @JoinColumn(name = "id_utente")
     @JsonIgnore
@@ -28,12 +34,12 @@ public class T_Evento {
 
     @ManyToOne
     @JoinColumn(name = "id_impegno")
-    @JsonIgnore
+
     private T_Impegno impegno;
 
     @ManyToOne
     @JoinColumn(name = "id_attivita")
-    @JsonIgnore
+
     private T_Attivita attivita;
 
 }

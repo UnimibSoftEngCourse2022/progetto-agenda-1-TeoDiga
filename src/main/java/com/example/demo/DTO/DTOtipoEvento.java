@@ -11,7 +11,8 @@ import lombok.Setter;
 @Setter
 public class DTOtipoEvento {
     public String tipo;
-    public  String descrizione;
+    public String descrizione;
     public String colore;
-
+    public Character CRUD;
+    public Integer id;
 }

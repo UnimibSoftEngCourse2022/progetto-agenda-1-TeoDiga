@@ -10,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DTOImpegno {
+    public Character CRUD;
+    public Integer id;
     public String titolo;
     public String descrizione;
     public String tipo;

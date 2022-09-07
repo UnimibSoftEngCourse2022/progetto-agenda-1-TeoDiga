@@ -23,10 +23,10 @@ public class T_Attivita {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_attivita")
     public Integer idAttivita;
-
+    public boolean pianificata;
     public String titolo, descrizione;
     public Timestamp creazione, scadenza;
-    public boolean pianificata;
+
     public Integer priorita;
     @ManyToOne
     @JoinColumn(name = "id_utente")
@@ -35,17 +35,17 @@ public class T_Attivita {
 
     @ManyToOne
     @JoinColumn(name = "id_tipo")
-    @JsonIgnore
+
     private T_Tipo_evento tipoEventoAtt;
 
     @ManyToOne
     @JoinColumn(name = "durata_a_um")
-    @JsonIgnore
+
     private T_UMT umtDurataAtt;
 
     @ManyToOne
     @JoinColumn(name = "allarme_a_um")
-    @JsonIgnore
+
     private T_UMT umtAllAtt;
 
     @Column(name = "durata_a_n")
@@ -55,5 +55,6 @@ public class T_Attivita {
     @Column(name = "allarme_a_n")
     public Integer allarmeAN;
     @OneToMany(mappedBy = "attivita")
+    @JsonIgnore
     private List<T_Evento> eventi;
 }

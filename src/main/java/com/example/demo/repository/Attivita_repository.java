@@ -9,15 +9,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
 public interface Attivita_repository extends JpaRepository<T_Attivita, Integer> {
-    List<T_Attivita> findT_AttivitaByUtenteAttAndPianificataOrderByDurataSec(T_Utente utente, boolean b);
-
-    List<T_Attivita> findT_AttivitaByUtenteAtt(T_Utente utente);
-    List<T_Attivita> findT_AttivitaByUtenteAttAndTipoEventoAtt(T_Utente utente, T_Tipo_evento tipo);
+    boolean existsT_AttivitaByUtenteAttAndIdAttivita(T_Utente utente, Integer id);
+    boolean existsT_AttivitaByUtenteAttAndTitolo(T_Utente utente, String s);
+    List<T_Attivita> findT_AttivitaByUtenteAttAndPianificata(T_Utente utente, boolean b);
+    List<T_Attivita> findT_AttivitaByUtenteAttAndPianificataOrderByDurataSecAsc(T_Utente utente, boolean b);
+    List<T_Attivita> findT_AttivitaByUtenteAttAndTitolo(T_Utente utente, String nome);
+    List<T_Attivita> findT_AttivitaByUtenteAttOrderByPrioritaAsc(T_Utente utente);
+    List<T_Attivita> findT_AttivitaByUtenteAttAndTipoEventoAttOrderByPrioritaAsc(T_Utente utente, T_Tipo_evento tipo);
     T_Attivita getT_AttivitaByUtenteAttAndTitolo(T_Utente utente, String titolo);
     T_Attivita getT_AttivitaByUtenteAttAndIdAttivita(T_Utente utente, Integer id);
     @Modifying
@@ -27,12 +31,22 @@ public interface Attivita_repository extends JpaRepository<T_Attivita, Integer> 
             "where a.id_utente=?1", nativeQuery = true)
     void setPriorita(Integer id_utente);
 
-    @Query(value = "select value( max(orario_fine), current_timestamp) from APP.EVENTI " +
-            "where id_utente=?1 and orario_inizio <= current_timestamp " +
-            "and orario_fine > current_timestamp", nativeQuery = true)
+    @Query(value = "select value( max(orario_fine), {fn timestampadd(SQL_TSI_HOUR,2,current_timestamp)}) from APP.EVENTI " +
+            "where id_utente=?1 and orario_inizio <= {fn timestampadd(SQL_TSI_HOUR,2,current_timestamp)} " +
+            "and orario_fine > {fn timestampadd(SQL_TSI_HOUR,2,current_timestamp)}", nativeQuery = true)
     Timestamp inizioPeriodoLibero(Integer id_utente);
-
-    @Query(value ="select value(min(orario_inizio), {fn timestampadd(SQL_TSI_YEAR, 5, ?2)}) from APP.EVENTI "+
+    @Query(value = "select value(max(orario_fine), ?2) from APP.EVENTI "+
+            "where id_utente=?1 and orario_inizio <=?2 and orario_fine > ?2 and orario_fine < ?3", nativeQuery = true)
+    Timestamp inizioSlot(Integer id_utente, Timestamp partenza, Timestamp limite);
+    @Query(value =  "select min (x.orario_inizio) as orario_inizio from "+
+            "(select orario_inizio from APP.EVENTI "+
+            " where id_utente=?1 and orario_inizio> ?2" +
+            " union " +
+            " select value(?3,current_timestamp) as orario_inizio from sysibm.sysdummy1) x", nativeQuery = true)
+    Timestamp fineSlot(Integer id_utente, Timestamp partenza, Timestamp limite);
+    @Query(value = "select {fn timestampdiff(SQL_TSI_SECOND, ?1, ?2)} from sysibm.sysdummy1", nativeQuery = true)
+    Integer durataSlot( Timestamp dal, Timestamp al);
+    @Query(value ="select value(min(orario_inizio), {fn timestampadd(SQL_TSI_YEAR, 100, ?2)}) from APP.EVENTI "+
             "where id_utente=?1 and orario_inizio >= ?2", nativeQuery = true)
     Timestamp finePeriodoLibero(Integer id_utente, Timestamp inizioPeriodo);
 

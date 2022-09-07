@@ -20,4 +20,16 @@ public class TipiEventoService {
         tipo.setColore(dtOtipoEvento.getColore());
         return tipi_evento_repository.save(tipo);
     }
+    public T_Tipo_evento aggiornaTipoE(T_Tipo_evento evento, DTOtipoEvento dto){
+        if(dto.getTipo()!= null){
+            evento.setTipo(dto.getTipo());
+        }
+        if(dto.getDescrizione()!=null){
+            evento.setDescrizione(dto.getDescrizione());
+        }
+        if(dto.getColore()!= null){
+            evento.setColore(dto.getColore());
+        }
+        return tipi_evento_repository.save(evento);
+    }
 }

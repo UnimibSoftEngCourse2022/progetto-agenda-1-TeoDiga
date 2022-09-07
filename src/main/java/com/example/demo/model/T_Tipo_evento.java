@@ -28,8 +28,10 @@ public class T_Tipo_evento {
     public  String tipo, descrizione, colore;
 
     @OneToMany(mappedBy = "tipoEventoImp")
+    @JsonIgnore
     private List<T_Impegno> impegni;
     @OneToMany(mappedBy = "tipoEventoAtt")
+    @JsonIgnore
     private List<T_Attivita> attivitas;
 
 

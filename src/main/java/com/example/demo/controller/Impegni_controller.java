@@ -3,11 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.DTO.DTOImpegno;
 import com.example.demo.eccezioni.FormatoNonValidoException;
 import com.example.demo.eccezioni.NonTrovatoException;
-import com.example.demo.model.T_Tipo_evento;
-import com.example.demo.model.T_UMT;
-import com.example.demo.model.T_Utente;
+import com.example.demo.model.*;
+import com.example.demo.repository.Eventi_repository;
 import com.example.demo.repository.Impegni_repository;
-import com.example.demo.model.T_Impegno;
 import com.example.demo.repository.Tipi_evento_repository;
 import com.example.demo.repository.UMT_repository;
 import com.example.demo.repository.Utenti_repository;
@@ -20,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -39,49 +39,101 @@ public class Impegni_controller {
     private ImpegniService impegniService;
     @Autowired
     private EventiService ev;
+    @Autowired
+    private Eventi_repository eventi_repository;
 
-    @GetMapping
-    public List<T_Impegno> getImpegni(@RequestHeader("Authorization") String Token) {
-        String username = tokenService.validateTokenAndGetUsername(Token.substring(7));
-        T_Utente utente = utenti_repository.getT_UtenteByUserName(username);
-        return impegni_repository.findT_ImpegnoByUtenteImp(utente);
-    }
+    private T_Impegno trovaImpegnoId(DTOImpegno dto, T_Utente utente){
 
-    @GetMapping("/tipo:{tipo}")
-    public List<T_Impegno> getImpegniByTipo(@RequestHeader("Authorization") String Token, @PathVariable String tipo) {
-        String username = tokenService.validateTokenAndGetUsername(Token.substring(7));
-        T_Utente utente = utenti_repository.getT_UtenteByUserName(username);
-        if (tipi_evento_repository.existsByUtenteTeAndTipo(utente, tipo)) {
-            T_Tipo_evento tipo_evento = tipi_evento_repository.getT_Tipo_eventoByUtenteTeAndTipo(utente, tipo);
-            return impegni_repository.findT_ImpegnoByUtenteImpAndTipoEventoImp(utente, tipo_evento);
-        } else {
-            throw new NonTrovatoException("non esiste il tipo di impegno " + tipo + " per l'utente " + utente.getUserName());
+        if (impegni_repository.existsT_ImpegnoByUtenteImpAndIdImpegno(utente, dto.getId())){
+            return impegni_repository.getT_ImpegnoByUtenteImpAndIdImpegno(utente, dto.getId());
+        }
+        else{
+            throw new NonTrovatoException("non esiste un impegno con id "+dto.getId()+" nelle rubrica dell'utente");
         }
     }
+    private List<T_Impegno> trovaImpegnoNome(DTOImpegno dto, T_Utente utente){
+        List<T_Impegno> rispo = new ArrayList<>();
+        if(impegni_repository.existsT_ImpegnoByUtenteImpAndTitolo(utente, dto.getTitolo())){
+            rispo = impegni_repository.findT_ImpegnoByUtenteImpAndTitolo(utente, dto.getTitolo());
+        }
+        else{
+            throw new NonTrovatoException("non esiste un impegno con titolo "+dto.getTitolo()+" nelle rubrica dell'utente");
+        }
+        return rispo;
+    }
+    private List<T_Impegno> trovaImpegni(DTOImpegno dto, T_Utente utente){
+        List<T_Impegno> rispo = new ArrayList<>();
+        if(dto.getId()!= null){
+            rispo.add(trovaImpegnoId(dto, utente));
+        } else if ((dto.getTitolo()!= null)&&(dto.getTitolo()!="")) {
+            rispo = trovaImpegnoNome(dto, utente);
 
-    @PostMapping
-    public T_Impegno postImpegno(@RequestBody DTOImpegno dto,
-                                 @RequestHeader("Authorization") String Token) throws SQLException {
-        String username = tokenService.validateTokenAndGetUsername(Token.substring(7));
-        T_Utente utente = utenti_repository.getT_UtenteByUserName(username);
-        T_UMT freq, durata, all;
-        freq = umt_repository.getT_UMTByIdUMT(dto.getFreq());
-        durata = umt_repository.getT_UMTByIdUMT(dto.getDurata());
-        all = umt_repository.getT_UMTByIdUMT(dto.getAll());
+        } else if ((dto.getTipo()!=null)&&(dto.getTipo()!="")&&(tipi_evento_repository.existsByUtenteTeAndTipo(utente, dto.getTipo()))) {
+            T_Tipo_evento tipo= tipi_evento_repository.getT_Tipo_eventoByUtenteTeAndTipo(utente, dto.getTipo());
+            rispo = impegni_repository.findT_ImpegnoByUtenteImpAndTipoEventoImp(utente, tipo);
+        } else {
+            rispo = impegni_repository.findT_ImpegnoByUtenteImp(utente);
+        }
 
-        T_Impegno IM = impegniService.inserisciImpegno(dto, utente, freq, durata, all);
-        ev.inserisciEvento(IM, IM.getInizio_impegno());
-        return IM;
-
+        return rispo;
     }
 
-    @PutMapping
-    public T_Impegno modificaImpegno(@RequestBody DTOImpegno dto,
-                                     @RequestHeader("Authorization") String Token) throws SQLException {
+     private List<T_Impegno> postImpegno(DTOImpegno dto,T_Utente utente) throws SQLException {
+         List<T_Impegno> rispo = new ArrayList<>();
+
+
+         T_Impegno IM = impegniService.inserisciImpegno(dto, utente);
+         ev.inserisciEventoI(IM, IM.getInizioImpegno());
+         rispo.add(IM);
+         return rispo;}
+    @PostMapping
+    public List<T_Impegno> gestioneImpegno(@RequestBody DTOImpegno dto,
+                                             @RequestHeader("Authorization") String Token) throws SQLException {
+
         String username = tokenService.validateTokenAndGetUsername(Token.substring(7));
         T_Utente utente = utenti_repository.getT_UtenteByUserName(username);
+        List<T_Impegno> ritorno = null;
+        switch (dto.getCRUD()){
+            case 'C':
+                ritorno = postImpegno(dto,utente);
+                break;
 
-        return impegniService.aggiornaImpegno();
+            case 'R':
+                ritorno = trovaImpegni(dto, utente);
+                break;
+            case 'U':
+                ritorno = modificaImpegno(dto, utente);
+                break;
+
+
+            case 'D':
+                ritorno = eliminaImpegno(dto, utente);
+                break;
+
+        }
+        return ritorno;
+
+    }
+    private List<T_Impegno> modificaImpegno(DTOImpegno dto, T_Utente utente) throws SQLException{
+        List<T_Impegno> risposta = new ArrayList<>();
+        T_Impegno target= trovaImpegnoId(dto, utente);
+
+        risposta.add(impegniService.aggiornaImpegno(target, dto));
+
+        List<T_Evento> condannati= eventi_repository.findT_EventoByUtenteEvAndImpegnoOrderByOrarioInizioAsc(utente, target);
+        Iterator<T_Evento> i= condannati.iterator();
+        while(i.hasNext()){
+            eventi_repository.delete(i.next());
+        }
+        ev.inserisciEventoI(target, target.getInizioImpegno());
+        return risposta;
+    }
+    private List<T_Impegno> eliminaImpegno(DTOImpegno dto, T_Utente utente){
+        List<T_Impegno> risposta = new ArrayList<>();
+        T_Impegno target= trovaImpegnoId(dto, utente);
+        impegni_repository.delete(target);
+
+        return risposta;
     }
 
 }

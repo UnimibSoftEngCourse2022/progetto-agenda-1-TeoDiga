@@ -21,7 +21,8 @@ import java.util.List;
 public class T_Impegno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Integer id_impegno;
+    @Column(name = "id_impegno")
+    public Integer idImpegno;
     public String titolo, descrizione;
 
     @ManyToOne
@@ -30,10 +31,12 @@ public class T_Impegno {
     private T_Utente utenteImp;
     @ManyToOne
     @JoinColumn(name = "id_tipo")
-    @JsonIgnore
-    private T_Tipo_evento tipoEventoImp;
 
-    public Timestamp inizio_impegno, fine_impegno;
+    private T_Tipo_evento tipoEventoImp;
+    @Column(name = "inizio_impegno")
+    public Timestamp inizioImpegno;
+    @Column(name = "fine_impegno")
+    public Timestamp fineImpegno;
 
     @Column(name ="frequenza_i_n")
     private Integer frequenzaIN;
@@ -44,21 +47,22 @@ public class T_Impegno {
 
     @ManyToOne
     @JoinColumn(name = "frequenza_i_um")
-    @JsonIgnore
+
     private T_UMT umtFreqImp;
 
     @ManyToOne
     @JoinColumn(name = "durata_i_um")
-    @JsonIgnore
+
     private T_UMT umtDurataImp;
 
     @ManyToOne
     @JoinColumn(name = "allarme_un")
-    @JsonIgnore
+
     private T_UMT umtAllImp;
 
     @OneToMany(mappedBy = "impegno")
-    private List<T_Evento> impegni;
+    @JsonIgnore
+    private List<T_Evento> eventi;
 
 
 }

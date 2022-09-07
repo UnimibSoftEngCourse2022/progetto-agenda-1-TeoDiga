@@ -22,10 +22,8 @@ public class TipiContattoService {
     }
 
     public T_Tipo_contatto aggiornaTipo(DTOtipoContatto dto, T_Tipo_contatto tipo_contatto){
-        if(dto.getId() != null){
-            if(dto.getTipo() != tipo_contatto.getTipo()){
+        if(dto.getTipo() != null){
                 tipo_contatto.setTipo(dto.getTipo());
-            }
         }
         if(dto.getDescrizione() != null){
             tipo_contatto.setDescrizione(dto.getDescrizione());

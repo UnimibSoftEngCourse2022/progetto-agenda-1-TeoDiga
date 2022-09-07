@@ -18,7 +18,9 @@ public class ContattiService {
     private Tipi_contatto_repository tipi_contatto_repository;
     public T_Contatto inserisciContatto(DTOcontatto dto, T_Utente utente){
         T_Contatto contatto = new T_Contatto();
-        contatto.setTipoContattoCon(trovaTipo(utente, dto.getTipo()));
+        if( dto.getTipo()!= null){
+            contatto.setTipoContattoCon(tipi_contatto_repository.getT_Tipo_contattoByUtenteTcAndTipo(utente, dto.getTipo()));
+        }
         contatto.setUtenteCon(utente);
         contatto.setNomeCognome(dto.getNomeCognome());
         contatto.setEmail(dto.getEmail());
@@ -28,8 +30,8 @@ public class ContattiService {
 
     public T_Contatto aggiornaContatto(T_Contatto contatto, DTOcontatto dto){
         T_Utente utente= contatto.getUtenteCon();
-        if(trovaTipo(utente, dto.getTipo())!= null) {
-            contatto.setTipoContattoCon(trovaTipo(utente, dto.getTipo()));
+        if( dto.getTipo()!= null) {
+            contatto.setTipoContattoCon(tipi_contatto_repository.getT_Tipo_contattoByUtenteTcAndTipo(utente, dto.getTipo()));
         }
         if(dto.getNomeCognome() != null) {
             contatto.setNomeCognome(dto.getNomeCognome());
@@ -43,18 +45,6 @@ public class ContattiService {
         return contatti_repository.save(contatto);
 
     }
-    private T_Tipo_contatto trovaTipo(T_Utente utente, String nomeTipo){
 
-        T_Tipo_contatto tipo_contatto =null;
-        if(nomeTipo== null){
-
-        } else if(tipi_contatto_repository.existsT_Tipo_contattoByUtenteTcAndTipo(utente, nomeTipo)){
-                tipo_contatto = tipi_contatto_repository.getT_Tipo_contattoByUtenteTcAndTipo(utente, nomeTipo);
-        }
-        else{
-            throw new NonTrovatoException("il tipo di contatto " + nomeTipo + " non è presente nella rubrica dell'utente " + utente.getUserName());
-        }
-        return tipo_contatto;
-    }
 
 }
